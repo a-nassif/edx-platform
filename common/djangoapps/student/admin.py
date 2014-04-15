@@ -6,6 +6,9 @@ from student.models import UserProfile, UserTestGroup, CourseEnrollmentAllowed
 from student.models import CourseEnrollment, Registration, PendingNameChange, CourseAccessRole, CourseAccessRoleAdmin
 from ratelimitbackend import admin
 
+from django.conf import settings
+from django.dispatch import receiver
+
 admin.site.register(UserProfile)
 
 admin.site.register(UserTestGroup)
