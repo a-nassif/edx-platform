@@ -17,6 +17,7 @@ class CourseOutlineItem(object):
     EDIT_BUTTON_SELECTOR = '.xblock-title .xblock-field-value-edit'
     NAME_SELECTOR = '.xblock-title .xblock-field-value'
     NAME_INPUT_SELECTOR = '.xblock-title .xblock-field-input'
+    NAME_FIELD_WRAPPER_SELECTOR = '.xblock-title .wrapper-xblock-field'
 
     def __repr__(self):
         return "{}(<browser>, {!r})".format(self.__class__.__name__, self.locator)
@@ -50,11 +51,11 @@ class CourseOutlineItem(object):
         set_input_value_and_save(self, self._bounded_selector(self.NAME_INPUT_SELECTOR), new_name)
         self.wait_for_ajax()
 
-    def in_editable_from(self):
+    def in_editable_form(self):
         """
         Return whether this outline item's display name is in its editable form.
         """
-        return "is-hidden" not in self.q(css=self._bounded_selector(self.NAME_INPUT_SELECTOR)).first.attrs("class")
+        return "is-editing" in self.q(css=self._bounded_selector(self.NAME_FIELD_WRAPPER_SELECTOR)).first.attrs("class")
 
 
 class CourseOutlineContainer(CourseOutlineItem):
@@ -264,13 +265,13 @@ class CourseOutlinePage(CoursePage, CourseOutlineContainer):
         """
         Clicks the button for adding a section which resides at the top of the screen.
         """
-        click_css('.wrapper-mast nav.nav-actions .add-button')
+        click_css(self, '.wrapper-mast nav.nav-actions .add-button')
 
     def add_section_from_bottom_button(self):
         """
         Clicks the button for adding a section which resides at the bottom of the screen.
         """
-        click_css('.course-outline > .add-xblock-component .add-button')
+        click_css(self, '.course-outline > .add-xblock-component .add-button')
 
     @property
     def has_no_content_message(self):

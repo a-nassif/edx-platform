@@ -38,25 +38,93 @@ class CourseOutlineTest(StudioCourseTest):
         )
 
 
-class CourseSectionTest(CourseOutlineTest):
+class EditNamesTest(CourseOutlineTest):
     """
-    Tests that verify the sections name editable only inside headers in Studio Course Outline that you can get to
-    when logged in and have a course.
+    Feature: Click-to-edit section/subsection names
     """
 
     __test__ = True
 
-    def test_section_name_editable_in_course_outline(self):
+    def set_name_and_verify(self, item, old_name, new_name, expected_name):
+        self.assertEqual(item.name, old_name)
+        item.change_name(new_name)
+        self.assertFalse(item.in_editable_form())
+        self.assertEqual(item.name, expected_name)
+
+    def test_edit_section_name(self):
         """
-        Check that section name is editable on course outline page.
+        Scenario: Click-to-edit section name
+            Given that I have created a section
+            When I click on the name of section
+            Then the section name becomes editable
+            And given that I have edited the section name
+            When I click outside of the edited section name
+            Then the section name saves
+            And becomes non-editable
         """
         self.course_outline_page.visit()
-        new_name = u"Test Section New"
-        section = self.course_outline_page.section_at(0)
-        self.assertEqual(section.name, u"Test Section")
-        section.change_name(new_name)
-        self.browser.refresh()
-        self.assertEqual(section.name, new_name)
+        self.set_name_and_verify(
+            self.course_outline_page.section_at(0),
+            'Test Section',
+            'Changed',
+            'Changed'
+        )
+
+    def test_edit_subsection_name(self):
+        """
+        Scenario: Click-to-edit subsection name
+            Given that I have created a subsection
+            When I click on the name of subsection
+            Then the subsection name becomes editable
+            And given that I have edited the subsection name
+            When I click outside of the edited subsection name
+            Then the subsection name saves
+            And becomes non-editable
+        """
+        self.course_outline_page.visit()
+        self.set_name_and_verify(
+            self.course_outline_page.section_at(0).subsection_at(0),
+            'Test Subsection',
+            'Changed',
+            'Changed'
+        )
+
+
+    def test_edit_empty_section_name(self):
+        """
+        Scenario: Click-to-edit section name, enter empty name
+            Given that I have crate a section
+            And I have clicked to edit the name of the section
+            And I have entered an empty section name
+            When I click outside of the edited section name
+            Then the section name does not change
+            And becomes non-editable
+        """
+        self.course_outline_page.visit()
+        self.set_name_and_verify(
+            self.course_outline_page.section_at(0),
+            'Test Section',
+            '',
+            'Test Section'
+        )
+
+    def test_edit_empty_subsection_name(self):
+        """
+        Scenario: Click-to-edit subsection name, enter empty name
+            Given that I have created a subsection
+            And I have clicked to edit the name of the subsection
+            And I have entered an empty subsection name
+            When I click outside of the edited subsection name
+            Then the subsection name does not change
+            And becomes non-editable
+        """
+        self.course_outline_page.visit()
+        self.set_name_and_verify(
+            self.course_outline_page.section_at(0).subsection_at(0),
+            'Test Subsection',
+            '',
+            'Test Subsection'
+        )
 
     # TODO: reenable when release date support is added back
     # def test_section_name_not_editable_inside_modal(self):
