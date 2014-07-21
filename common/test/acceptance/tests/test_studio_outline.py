@@ -29,7 +29,13 @@ class CourseOutlineTest(StudioCourseTest):
 
     def populate_course_fixture(self, course_fixture):
         """ Install a course with sections/problems, tabs, updates, and handouts """
-        course_fixture.add_children(XBlockFixtureDesc('chapter', 'Test Section'))
+        course_fixture.add_children(
+            XBlockFixtureDesc('chapter', 'Test Section').add_children(
+                XBlockFixtureDesc('sequential', 'Test Subsection').add_children(
+                    XBlockFixtureDesc('vertical', 'Test Unit')
+                )
+            )
+        )
 
 
 class CourseSectionTest(CourseOutlineTest):
@@ -37,6 +43,9 @@ class CourseSectionTest(CourseOutlineTest):
     Tests that verify the sections name editable only inside headers in Studio Course Outline that you can get to
     when logged in and have a course.
     """
+
+    __test__ = True
+
     def test_section_name_editable_in_course_outline(self):
         """
         Check that section name is editable on course outline page.
@@ -67,6 +76,8 @@ class CreateSectionsTest(CourseOutlineTest):
     """
     Feature: Create new sections/subsections/units
     """
+
+    __test__ = True
 
     def populate_course_fixture(self, course_fixture):
         """ Start with a completely empty course to easily test adding things to it """
@@ -131,3 +142,115 @@ class CreateSectionsTest(CourseOutlineTest):
         self.course_outline_page.section_at(0).subsection_at(0).add_unit()
         unit_page = ContainerPage(self.browser, None)
         self.assertTrue(unit_page.display_name_in_editable_form())
+
+
+class DeleteContentTest(CourseOutlineTest):
+    """
+    Feature: Deleting sections/subsections/units
+    """
+
+    __test__ = True
+
+    def test_delete_section(self):
+        """
+        Scenario: Delete section
+            Given that I am on the course outline
+            When I click the delete button for a section on the course outline
+            Then I should receive a confirmation message, asking me if I really want to delete the section
+            When I click "Yes, I want to delete this component"
+            Then the confirmation message should close
+            And the section should immediately be deleted from the course outline
+        """
+        self.course_outline_page.visit()
+        self.assertEqual(len(self.course_outline_page.sections()), 1)
+        self.course_outline_page.section_at(0).delete()
+        self.assertEqual(len(self.course_outline_page.sections()), 0)
+
+    def test_cancel_delete_section(self):
+        """
+        Scenario: Cancel delete of section
+            Given that I clicked the delte button for a section on the course outline
+            And I received a confirmation message, asking me if I really want to delete the component
+            When I click "Cancel"
+            Then the confirmation message should close
+            And the section should remain in the course outline
+        """
+        self.course_outline_page.visit()
+        self.assertEqual(len(self.course_outline_page.sections()), 1)
+        self.course_outline_page.section_at(0).delete(cancel=True)
+        self.assertEqual(len(self.course_outline_page.sections()), 1)
+
+    def test_delete_subsection(self):
+        """
+        Scenario: Delete subsection
+            Given that I am on the course outline
+            When I click the delete button for a subsection on the course outline
+            Then I should receive a confirmation message, asking me if I really want to delte the subsection
+            When I click "Yes, I want to delete this component"
+            Then the confiramtion message should close
+            And the subsection should immediately be deleted from the course outline
+        """
+        self.course_outline_page.visit()
+        self.assertEqual(len(self.course_outline_page.section_at(0).subsections()), 1)
+        self.course_outline_page.section_at(0).subsection_at(0).delete()
+        self.assertEqual(len(self.course_outline_page.section_at(0).subsections()), 0)
+
+
+    def test_cancel_delete_subsection(self):
+        """
+        Scenario: Cancel delete of subsection
+            Given that I clicked the delete button for a subsection on the course outline
+            And I received a confirmation message, asking me if I really want to delete the subsection
+            When I click "cancel"
+            Then the confirmation message should close
+            And the subsection should remain in the course outline
+        """
+        self.course_outline_page.visit()
+        self.assertEqual(len(self.course_outline_page.section_at(0).subsections()), 1)
+        self.course_outline_page.section_at(0).subsection_at(0).delete(cancel=True)
+        self.assertEqual(len(self.course_outline_page.section_at(0).subsections()), 1)
+
+    def test_delete_unit(self):
+        """
+        Scenario: Delete unit
+            Given that I am on the course outline
+            When I click the delete button for a unit on the course outline
+            Then I should receive a confirmation message, asking me if I really want to delete the unit
+            When I click "Yes, I want to delete this unit"
+            Then the confirmation message should close
+            And the unit should immediately be deleted from the course outline
+        """
+        self.course_outline_page.visit()
+        self.course_outline_page.section_at(0).subsection_at(0).toggle_expand()
+        self.assertEqual(len(self.course_outline_page.section_at(0).subsection_at(0).units()), 1)
+        self.course_outline_page.section_at(0).subsection_at(0).unit_at(0).delete()
+        self.assertEqual(len(self.course_outline_page.section_at(0).subsection_at(0).units()), 0)
+
+    def test_cancel_delete_unit(self):
+        """
+        Scenario: Cancel delete of unit
+            Given that I clicked the delete button for a unit on the course outline
+            And I received a confiramtion message, asking me if I really want to delete the unit
+            When I click "Cancel"
+            Then the confiramtion message should close
+            And the unit should remain in the course outline
+        """
+        self.course_outline_page.visit()
+        self.course_outline_page.section_at(0).subsection_at(0).toggle_expand()
+        self.assertEqual(len(self.course_outline_page.section_at(0).subsection_at(0).units()), 1)
+        self.course_outline_page.section_at(0).subsection_at(0).unit_at(0).delete(cancel=True)
+        self.assertEqual(len(self.course_outline_page.section_at(0).subsection_at(0).units()), 1)
+
+    def test_delete_all_no_content_message(self):
+        """
+        Scenario: Delete all sections/subsections/units in a course, "no content" message should appear
+            Given that I delete all sections, subsections, and units in a course
+            When I visit the course outline
+            Then I will see a message that says, "You haven't added any content to this course yet"
+            Add see a + Add Section button
+        """
+        self.course_outline_page.visit()
+        self.assertFalse(self.course_outline_page.has_no_content_message)
+        self.course_outline_page.section_at(0).delete()
+        self.assertEqual(len(self.course_outline_page.sections()), 0)
+        self.assertTrue(self.course_outline_page.has_no_content_message)

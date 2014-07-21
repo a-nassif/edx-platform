@@ -126,6 +126,16 @@ class CourseOutlineChild(PageObject, CourseOutlineItem):
     def is_browser_on_page(self):
         return self.q(css='{}[data-locator="{}"]'.format(self.BODY_SELECTOR, self.locator)).present
 
+    def delete(self, cancel=False):
+        """
+        Clicks the delete button, then cancels at the confirmation prompt if cancel is True.
+        """
+        click_css(self, self._bounded_selector('.delete-button'), require_notification=False)
+        if cancel:
+            click_css(self, '.prompt .action-secondary', require_notification=False)
+        else:
+            click_css(self, '.prompt .action-primary', require_notification=True)
+
 
 class CourseOutlineUnit(CourseOutlineChild):
     """
@@ -178,6 +188,18 @@ class CourseOutlineSubsection(CourseOutlineChild, CourseOutlineContainer):
         ).fulfill()
 
         return self
+
+    def units(self):
+        """
+        Returns the units in this subsection.
+        """
+        return self.children()
+
+    def unit_at(self, index):
+        """
+        Returns the CourseOutlineUnit at the specified index.
+        """
+        return self.child_at(index)
 
     def add_unit(self):
         self.add_child(require_notification=False)
@@ -249,3 +271,7 @@ class CourseOutlinePage(CoursePage, CourseOutlineContainer):
         Clicks the button for adding a section which resides at the bottom of the screen.
         """
         click_css('.course-outline > .add-xblock-component .add-button')
+
+    @property
+    def has_no_content_message(self):
+        return self.q(css='.course-outline .no-content').is_present()
