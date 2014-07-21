@@ -16,6 +16,7 @@ class ContainerPage(PageObject):
     Container page in Studio
     """
     NAME_SELECTOR = '.page-header-title'
+    NAME_INPUT_SELECTOR = '.page-header .xblock-field-input'
 
     def __init__(self, browser, locator):
         super(ContainerPage, self).__init__(browser)
@@ -237,6 +238,12 @@ class ContainerPage(PageObject):
         Returns an information message for the container page.
         """
         return self.q(css=".xblock-message.information").first.text[0]
+
+    def display_name_in_editable_form(self):
+        """
+        Return whether this container's display name is in its editable form.
+        """
+        return "is-hidden" not in self.q(self.NAME_INPUT_SELECTOR).first.attrs("class")
 
 
 class XBlockWrapper(PageObject):
