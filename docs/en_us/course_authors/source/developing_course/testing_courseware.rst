@@ -4,14 +4,20 @@
 Testing Your Courseware
 ###########################
 
-The way your course looks in Studio is not the way students see and experience it. To test your course, while you develop course content and afterward, you must view and interact with your course from a student's point of view.
+.. "courseware" is a troubled term -- perhaps "course content"? also, to distinguish more from the beta testing chapter, perhaps something like "Ongoing Validation of Your Course"... 
 
-From within Studio, you can:
+The way your course looks in Studio is not the way that students will see and
+experience it when it is live. To test the content that you add when you are
+building your course, you view and interact with your course from a student's
+point of view.
+
+In Studio, you have options to:
 
 * :ref:`Preview Your Course`
 * :ref:`View Your Live Course`
 
-For information about setting up a beta test for your course, see :ref:`Beta_Testing`.
+For information about setting up a beta test for your course, see
+:ref:`Beta_Testing`.
 
 .. _Preview Your Course:
 
@@ -19,24 +25,28 @@ For information about setting up a beta test for your course, see :ref:`Beta_Tes
 Preview Your Course
 ***********************
  
-When you view your course through Preview mode, you see all the
+When you view your course using Preview mode, you see all the
 units of your course, regardless of whether they are set to Public or
 Private and regardless of whether the release dates have passed.
- 
+
+.. ^ set to Private %%%
  
 Using Preview mode is the only way to see content that is set to Private
-**as a student would see it.**
+*as a student would see it*.
+
+.. ^ set to Private %%%
  
- 
-You can enter Preview mode in two ways.
+You can enter Preview mode in these ways.
  
 * On any subsection page, click **Preview Drafts**.
 
   .. image:: ../Images/preview_draft.png
    :width: 800
    :alt: Image of a subsection with the Preview Drafts button circled
+
+.. image change needed? %%%
  
-* On any Unit page, click **Preview**.
+* On any unit page, click **Preview**.
  
   The following example shows the **Preview** button for a unit that
   is set to Public.
@@ -45,6 +55,7 @@ You can enter Preview mode in two ways.
    :width: 800
    :alt: Image of a public unit with the Preview button circled
  
+.. image change needed? %%%
  
   The following example shows the **Preview** button for a unit that
   is set to Private.
@@ -52,6 +63,8 @@ You can enter Preview mode in two ways.
   .. image:: ../Images/preview_private.png
    :width: 800
    :alt: Image of a private unit with the Preview button circled
+
+.. ^ set to Private %%%
  
 .. _View Your Live Course:
 
@@ -59,7 +72,9 @@ You can enter Preview mode in two ways.
 Switch Between Studio and Your Live Course
 ******************************************
 
-While you work in Studio, you can switch to your live course to see how your course appears to students. Because you are logged in as a course team member, when you switch to your live course you see the **Staff View**. 
+While you work in Studio, you can switch to your live course to see how your
+course appears to students. Because you are logged in as a course team member,
+when you switch to your live course you see the **Staff View**.
 
   .. image:: ../Images/Live_Course_Staff_View.png
    :width: 800
@@ -67,11 +82,16 @@ While you work in Studio, you can switch to your live course to see how your cou
  
 In **Staff View**:
 
-* You see all of the units that are set to **Public**, regardless of the release dates of the containing section or subsection.  
+* You see all of the units that are set to **Public**, regardless of the
+  release dates of the containing section or subsection.
 
-* You do not see units that are set to **Private**. To see Private units, you must use Preview mode as described in :ref:`Preview Your Course`.
+* You do not see units that are set to **Private**. To see Private units, you
+  must use Preview mode as described in :ref:`Preview Your Course`.
 
-* You can access the Instructor Dashboard, which has features and reports that help you run your course.
+.. ^ set to Private %%%
+
+* You can access the Instructor Dashboard, which has features and reports that
+  help you run your course.
 
 .. DOC-311 filed to add info about student vs. staff view 
 
@@ -79,39 +99,54 @@ In **Staff View**:
 
 .. To switch from **Staff View** to **Student View** and back again, click **Staff View** or **Student View**.
 
-When you view your live course in **Staff View**, you can execute tests to make sure your course works the way you intend. For example, the course team can work through all of the problems to verify that the correct answer gets a green check for correct, and that any answer other than the correct one gets a red X for incorrect. 
+When you view your live course in **Staff View**, you can execute tests to make
+sure that your course works the way you intend. For example, members of the
+course team can work through the problems to verify that the correct answer
+gets a green check for correct, and that any answer other than the correct one
+gets a red X for incorrect.
 
 ======================================
 Go to Your Live Course from Studio
 ======================================
 
-To switch from Studio to your live course, click **View Live** on any of these pages:
+To switch from Studio to your live course, click **View Live** on any of these
+pages:
+
+* The **My Courses** dashboard page.
  
 * The **Course Outline** page.
 
   .. image:: ../Images/course_outline_view_live.png
    :width: 800
    :alt: Image of the course outline with the View Live button circled
+
+.. image change needed? %%%
  
 * Any Subsection page.
  
   .. image:: ../Images/subsection_view_live.png
     :width: 800
     :alt: Image of a subsection with the View Live button circled
- 
+
+.. image change needed? %%%
+  
 * The Unit page, if the Unit is Public.
  
   .. image:: ../Images/unit_view_live.png
      :width: 800
      :alt: Image of a unit with the View Live button circled
 
-When you click **View Live**, the **Courseware** page or the corresponding subsection or unit page opens.
+.. image change needed? %%%
+
+When you click **View Live**, the **Courseware** page or the corresponding
+subsection or unit page opens.
 
 ====================================
 Go to Studio from Your Live Course
 ====================================
 
-To switch from your live course to Studio, click **View {page} in Studio** on any of these pages:
+To switch from your live course to Studio, click **View {page} in Studio** on
+any of these pages:
  
 * Any unit (shown in the :ref:`View Your Live Course` section above).
  
@@ -121,7 +156,8 @@ To switch from your live course to Studio, click **View {page} in Studio** on an
     :width: 800
     :alt: Image of the Instructor Dashboard in a live course with a View Course in Studio button
 
-  For information about the tasks you can complete on the Instructor Dashboard, see :ref:`Running Your Course Index`.  
+  For information about the tasks you can complete on the Instructor Dashboard,
+  see :ref:`Running Your Course Index`.
  
 * The **Course Progress** page for a specified student. 
  
@@ -129,4 +165,5 @@ To switch from your live course to Studio, click **View {page} in Studio** on an
      :width: 800
      :alt: Image of the Course Progress page for a student with a View  Grading in Studio button
 
-  For information about checking a student's progress, see :ref:`Review_grades`.
+  For information about checking a student's progress, see
+  :ref:`Review_grades`.
