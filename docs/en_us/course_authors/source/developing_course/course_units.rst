@@ -13,7 +13,7 @@ following:
 * `Viewing Units as a Student`_
 * `Unit States`_
 
-Unit tasks:
+When developing your course, you perform the following tasks with units:
 
 * `Create a Unit`_
 * `Preview a Unit`_
