@@ -3,7 +3,7 @@ Acceptance tests for studio related to the outline page.
 """
 
 from ..pages.studio.auto_auth import AutoAuthPage
-from ..pages.studio.overview import CourseOutlinePage, ContainerPage
+from ..pages.studio.overview import CourseOutlinePage, ContainerPage, ExpandCollapseLinkState
 from ..fixtures.course import CourseFixture, XBlockFixtureDesc
 
 from helpers import StudioCourseTest
@@ -322,3 +322,196 @@ class DeleteContentTest(CourseOutlineTest):
         self.course_outline_page.section_at(0).delete()
         self.assertEqual(len(self.course_outline_page.sections()), 0)
         self.assertTrue(self.course_outline_page.has_no_content_message)
+
+
+class ExpandCollapseMultipleSectionsTest(CourseOutlineTest):
+    """
+    Feature: In order to quickly view the details of a course's section and set release dates and grading as a course
+    author I want to use the course outline page.
+    These tests start with multiple existing course sections.
+    """
+
+    __test__ = True
+
+    def populate_course_fixture(self, course_fixture):
+        """ Start with a course with two sections """
+        course_fixture.add_children(
+            XBlockFixtureDesc('chapter', 'Test Section').add_children(
+                XBlockFixtureDesc('sequential', 'Test Subsection').add_children(
+                    XBlockFixtureDesc('vertical', 'Test Unit')
+                )
+            ),
+            XBlockFixtureDesc('chapter', 'Test Section 2').add_children(
+                XBlockFixtureDesc('sequential', 'Test Subsection 2').add_children(
+                    XBlockFixtureDesc('vertical', 'Test Unit 2')
+                )
+            )
+        )
+
+    def verify_all_sections(self, collapsed):
+        """
+        Verifies that all sections are collapsed if collapsed is True, otherwise all expanded.
+        """
+        for section in self.course_outline_page.sections():
+            self.assertEqual(collapsed, section.is_collapsed)
+
+    def toggle_all_sections(self):
+        """
+        Toggles the expand collapse state of all sections.
+        """
+        for section in self.course_outline_page.sections():
+            section.toggle_expand()
+
+    def test_expanded_by_default(self):
+        """
+        Scenario: The default layout for the outline page is to show sections in expanded view
+            Given I have a course with sections
+            When I navigate to the course outline page
+            Then I see the "Collapse All Sections" link
+            And all sections are expanded
+        """
+        self.course_outline_page.visit()
+        self.assertEquals(self.course_outline_page.expand_collapse_link_state, ExpandCollapseLinkState.COLLAPSE)
+        self.verify_all_sections(collapsed=False)
+
+    def test_link_remains_for_empty_course(self):
+        """
+        Scenario: Collapse link is not removed after last section of a course is deleted
+            Given I have a course with sections
+            And I navigate to the course outline page
+            When I will confirm all alerts
+            And I press the "section" delete icon
+            Then I see the "Collapse All Sections" link
+        """
+        self.course_outline_page.visit()
+        for section in self.course_outline_page.sections():
+            section.delete()
+        self.assertEquals(self.course_outline_page.expand_collapse_link_state, ExpandCollapseLinkState.COLLAPSE)
+
+    def test_collapse_all_when_all_expanded(self):
+        """
+        Scenario: Collapse all sections when all sections are expanded
+            Given I navigate to the outline page of a course with sections
+            And all sections are expanded
+            When I click the "Collapse All Sections" link
+            Then I see the "Expand All Sections" link
+            And all sections are collapsed
+        """
+        self.course_outline_page.visit()
+        self.verify_all_sections(collapsed=False)
+        self.course_outline_page.toggle_expand_collapse()
+        self.assertEquals(self.course_outline_page.expand_collapse_link_state, ExpandCollapseLinkState.EXPAND)
+        self.verify_all_sections(collapsed=True)
+
+    def test_collapse_all_when_some_expanded(self):
+        """
+        Scenario: Collapsing all sections when 1 or more sections are already collapsed
+            Given I navigate to the outline page of a course with sections
+            And all sections are expanded
+            When I collapse the first section
+            And I click the "Collapse All Sections" link
+            Then I see the "Expand All Sections" link
+            And all sections are collapsed
+        """
+        self.course_outline_page.visit()
+        self.verify_all_sections(collapsed=False)
+        self.course_outline_page.section_at(0).toggle_expand()
+        self.course_outline_page.toggle_expand_collapse()
+        self.assertEquals(self.course_outline_page.expand_collapse_link_state, ExpandCollapseLinkState.EXPAND)
+        self.verify_all_sections(collapsed=True)
+
+    def test_expand_all_when_all_collapsed(self):
+        """
+        Scenario: Expanding all sections when all sections are collapsed
+            Given I navigate to the outline page of a course with multiple sections
+            And I click the "Collapse All Sections" link
+            When I click the "Expand All Sections" link
+            Then I see the "Collapse All Sections" link
+            And all sections are expanded
+        """
+        self.course_outline_page.visit()
+        self.course_outline_page.toggle_expand_collapse()
+        self.assertEquals(self.course_outline_page.expand_collapse_link_state, ExpandCollapseLinkState.EXPAND)
+        self.course_outline_page.toggle_expand_collapse()
+        self.assertEquals(self.course_outline_page.expand_collapse_link_state, ExpandCollapseLinkState.COLLAPSE)
+        self.verify_all_sections(collapsed=False)
+
+    def test_expand_all_when_some_collapsed(self):
+        """
+        Scenario: Expanding all sections when 1 or more sections are already expanded
+            Given I navigate to the outline page of a course with multiple sections
+            And I click the "Collapse All Sections" link
+            When I expand the first section
+            And I click the "Expand All Sections" link
+            Then I see the "Collapse All Sections" link
+            And all sections are expanded
+        """
+        self.course_outline_page.visit()
+        self.course_outline_page.toggle_expand_collapse()
+        self.assertEquals(self.course_outline_page.expand_collapse_link_state, ExpandCollapseLinkState.EXPAND)
+        self.course_outline_page.section_at(0).toggle_expand()
+        self.course_outline_page.toggle_expand_collapse()
+        self.assertEquals(self.course_outline_page.expand_collapse_link_state, ExpandCollapseLinkState.COLLAPSE)
+        self.verify_all_sections(collapsed=False)
+
+
+class ExpandCollapseSingleSectionTest(CourseOutlineTest):
+    """
+    Feature: In order to quickly view the details of a course's section and set release dates and grading as a course
+    author I want ot use the course outline page.
+    These tests start with a single section.
+    """
+
+    __test__ = True
+
+    def test_link_remains_for_empty_course(self):
+        """
+        Scenario: Collapse link is not removed after last section of a course is deleted
+            Given I have a course with sections
+            And I navigate to the course outline page
+            When I will confirm all alerts
+            And I press the "section" delete icon
+            Then I see the "Collapse All Sections" link
+        """
+        self.course_outline_page.visit()
+        self.course_outline_page.section_at(0).delete()
+        self.assertEquals(self.course_outline_page.expand_collapse_link_state, ExpandCollapseLinkState.COLLAPSE)
+
+
+class ExpandCollapseEmptyTest(CourseOutlineTest):
+    """
+    Feature: In order to quickly view the details of a course's section and set release dates and grading as a course
+    author I want to use the course outline page.
+    These tests start with no course sections.
+    """
+
+    __test__ = True
+
+    def populate_course_fixture(self, course_fixture):
+        """ Start with an empty course """
+        pass
+
+    def test_no_expand_link_for_empty_course(self):
+        """
+        Scenario: Expand/collapse for a course with no sections
+            Given I have a course with no sections
+            When I navigate to the course outline page
+            Then I do not see the "Collapse All Sections" link
+        """
+        self.course_outline_page.visit()
+        self.assertEquals(self.course_outline_page.expand_collapse_link_state, ExpandCollapseLinkState.MISSING)
+
+    def test_link_appears_after_section_creation(self):
+        """
+        Scenario: Collapse link appears after creating first section of a course
+            Given I have a course with no sections
+            When I navigate to the course outline page
+            And I add a section
+            Then I see the "Collapse All Sections" link
+            And all sections are expanded
+        """
+        self.course_outline_page.visit()
+        self.assertEquals(self.course_outline_page.expand_collapse_link_state, ExpandCollapseLinkState.MISSING)
+        self.course_outline_page.add_section_from_top_button()
+        self.assertEquals(self.course_outline_page.expand_collapse_link_state, ExpandCollapseLinkState.COLLAPSE)
+        self.assertFalse(self.course_outline_page.section_at(0).is_collapsed)

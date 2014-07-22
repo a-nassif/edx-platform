@@ -115,6 +115,35 @@ class CourseOutlineContainer(CourseOutlineItem):
             require_notification=require_notification,
         )
 
+    def toggle_expand(self):
+        """
+        Toggle the expansion of this subsection.
+        """
+
+        self.browser.execute_script("jQuery.fx.off = true;")
+
+        def subsection_expanded():
+            add_button = self.q(css=self._bounded_selector('> .add-xblock-component a.add-button')).first.results
+            return add_button and add_button[0].is_displayed()
+
+        currently_expanded = subsection_expanded()
+
+        self.q(css=self._bounded_selector('.ui-toggle-expansion')).first.click()
+
+        EmptyPromise(
+            lambda: subsection_expanded() != currently_expanded,
+            "Check that the container {} has been toggled".format(self.locator)
+        ).fulfill()
+
+        return self
+
+    @property
+    def is_collapsed(self):
+        """
+        Return whether this outline item is currently collapsed.
+        """
+        return "collapsed" in self.q(css=self._bounded_selector('')).first.attrs("class")[0]
+
 
 class CourseOutlineChild(PageObject, CourseOutlineItem):
     """
@@ -169,27 +198,6 @@ class CourseOutlineSubsection(CourseOutlineChild, CourseOutlineContainer):
         """
         return self.child(title)
 
-    def toggle_expand(self):
-        """
-        Toggle the expansion of this subsection.
-        """
-        self.browser.execute_script("jQuery.fx.off = true;")
-
-        def subsection_expanded():
-            add_button = self.q(css=self._bounded_selector('.add-button')).first.results
-            return add_button and add_button[0].is_displayed()
-
-        currently_expanded = subsection_expanded()
-
-        self.q(css=self._bounded_selector('.ui-toggle-expansion')).first.click()
-
-        EmptyPromise(
-            lambda: subsection_expanded() != currently_expanded,
-            "Check that the subsection {} has been toggled".format(self.locator)
-        ).fulfill()
-
-        return self
-
     def units(self):
         """
         Returns the units in this subsection.
@@ -233,12 +241,19 @@ class CourseOutlineSection(CourseOutlineChild, CourseOutlineContainer):
         self.add_child()
 
 
+class ExpandCollapseLinkState:
+    MISSING = 0
+    COLLAPSE = 1
+    EXPAND = 2
+
+
 class CourseOutlinePage(CoursePage, CourseOutlineContainer):
     """
     Course Outline page in Studio.
     """
     url_path = "course"
     CHILD_CLASS = CourseOutlineSection
+    EXPAND_COLLAPSE_CSS = '.toggle-button-expand-collapse'
 
     def is_browser_on_page(self):
         return self.q(css='body.view-outline').present
@@ -273,6 +288,19 @@ class CourseOutlinePage(CoursePage, CourseOutlineContainer):
         """
         click_css(self, '.course-outline > .add-xblock-component .add-button')
 
+    def toggle_expand_collapse(self):
+        self.q(css=self.EXPAND_COLLAPSE_CSS).click()
+
     @property
     def has_no_content_message(self):
         return self.q(css='.course-outline .no-content').is_present()
+
+    @property
+    def expand_collapse_link_state(self):
+        link = self.q(css=self.EXPAND_COLLAPSE_CSS)[0]
+        if not link.is_displayed():
+            return ExpandCollapseLinkState.MISSING
+        elif "collapse-all" in link.get_attribute("class"):
+            return ExpandCollapseLinkState.COLLAPSE
+        else:
+            return ExpandCollapseLinkState.EXPAND
