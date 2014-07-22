@@ -261,6 +261,13 @@ class CourseOutlinePage(CoursePage, CourseOutlineContainer):
     def is_browser_on_page(self):
         return self.q(css='body.view-outline').present
 
+    def view_live(self):
+        """
+        Clicks the "View Live" link and switches to the new tab
+        """
+        click_css(self, '.view-live-button', require_notification=False)
+        self.browser.switch_to_window(self.browser.window_handles[-1])
+
     def section(self, title):
         """
         Return the :class:`.CourseOutlineSection` with the title `title`.

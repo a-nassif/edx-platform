@@ -6,6 +6,7 @@ from bok_choy.promise import EmptyPromise
 
 from ..pages.studio.auto_auth import AutoAuthPage
 from ..pages.studio.overview import CourseOutlinePage, ContainerPage, ExpandCollapseLinkState
+from ..pages.lms.courseware import CoursewarePage
 from ..fixtures.course import CourseFixture, XBlockFixtureDesc
 
 from helpers import StudioCourseTest
@@ -24,7 +25,6 @@ class CourseOutlineTest(StudioCourseTest):
         Install a course with no content using a fixture.
         """
         super(CourseOutlineTest, self).setUp()
-        self.auth_page = AutoAuthPage(self.browser, staff=True).visit()
         self.course_outline_page = CourseOutlinePage(
             self.browser, self.course_info['org'], self.course_info['number'], self.course_info['run']
         )
@@ -546,3 +546,35 @@ class DefaultStatesTest(CourseOutlineTest):
         self.course_outline_page.visit()
         self.assertTrue(self.course_outline_page.has_no_content_message)
         self.assertTrue(self.course_outline_page.bottom_add_section_button.is_present())
+
+    def test_view_live(self):
+        """
+        Scenario: View Live version from course outline
+            Given that I am on the course outline
+            When I click the "View Live" button
+            Then a new tab will open to the course on the LMS
+        """
+        self.course_outline_page.visit()
+        self.course_outline_page.view_live()
+        courseware = CoursewarePage(self.browser, self.course_id)
+        EmptyPromise(courseware.is_browser_on_page, 'Browser is on courseware page').fulfill()
+
+
+class UnitNavigationTest(CourseOutlineTest):
+    """
+    Feature: Navigate to units
+    """
+
+    __test__ = True
+
+    def test_navigate_to_unit(self):
+        """
+        Scenario: Click unit name to navigate to unit page
+            Given that I have expanded a section/subsection so I can see unit names
+            When I click on a unit name
+            Then I will be taken to the appropriate unit page
+        """
+        self.course_outline_page.visit()
+        self.course_outline_page.section_at(0).subsection_at(0).toggle_expand()
+        unit = self.course_outline_page.section_at(0).subsection_at(0).unit_at(0).go_to()
+        self.assertTrue(unit.is_browser_on_page)
