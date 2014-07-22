@@ -380,7 +380,7 @@ class ExpandCollapseMultipleSectionsTest(CourseOutlineTest):
     def test_no_expand_link_for_empty_course(self):
         """
         Scenario: Collapse link is removed after last section of a course is deleted
-            Given I have a course with sections
+            Given I have a course with multiple sections
             And I navigate to the course outline page
             When I will confirm all alerts
             And I press the "section" delete icon
@@ -472,7 +472,7 @@ class ExpandCollapseSingleSectionTest(CourseOutlineTest):
     def test_no_expand_link_for_empty_course(self):
         """
         Scenario: Collapse link is removed after last section of a course is deleted
-            Given I have a course with sections
+            Given I have a course with one section
             And I navigate to the course outline page
             When I will confirm all alerts
             And I press the "section" delete icon
