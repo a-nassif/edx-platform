@@ -515,3 +515,47 @@ class ExpandCollapseEmptyTest(CourseOutlineTest):
         self.course_outline_page.add_section_from_top_button()
         self.assertEquals(self.course_outline_page.expand_collapse_link_state, ExpandCollapseLinkState.COLLAPSE)
         self.assertFalse(self.course_outline_page.section_at(0).is_collapsed)
+
+
+class DefaultStatesTest(CourseOutlineTest):
+    """
+    Feature: Misc course outline default states/actions
+    """
+
+    __test__ = True
+
+    def populate_course_fixture(self, course_fixture):
+        """ Start with an empty course """
+        pass
+
+    def test_empty_course_message(self):
+        """
+        Scenario: Empty course state
+            Given that I am in a course with no sections, subsections, nor units
+            When I visit the course outline
+            Then I will see a message that says "You haven't added any content to this course yet"
+            And see a + Add Section button
+        """
+        self.course_outline_page.visit()
+        self.assertTrue(self.course_outline_page.has_no_content_message)
+        self.assertTrue(self.course_outline_page.bottom_add_section_button.is_present())
+
+    # TODO add these tests
+    # def test_loading_indicator(self):
+    #     """
+    #     Scenario: Loading indicator on course outline
+    #         Given that I am in a course where the outline takes a second or so to load
+    #         When I visit the course outline
+    #         Then I will see a "Loading" indicator before the course content appears
+    #     """
+    #     self.fail("I don't know how to test this")
+    #
+    # def test_view_live(self):
+    #     """
+    #     Scenario: View Live from course outline
+    #         Given that I am on the course outline
+    #         When I click the "View Live" button
+    #         Then a new tab will open to the course on the LMS
+    #     """
+    #     self.fail("I don't know how to test this")
+

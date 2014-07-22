@@ -17,6 +17,7 @@ class ContainerPage(PageObject):
     """
     NAME_SELECTOR = '.page-header-title'
     NAME_INPUT_SELECTOR = '.page-header .xblock-field-input'
+    NAME_FIELD_WRAPPER_SELECTOR = '.page-header .wrapper-xblock-field'
 
     def __init__(self, browser, locator):
         super(ContainerPage, self).__init__(browser)
@@ -243,7 +244,7 @@ class ContainerPage(PageObject):
         """
         Return whether this container's display name is in its editable form.
         """
-        return "is-hidden" not in self.q(css=self.NAME_INPUT_SELECTOR).first.attrs("class")
+        return "is-editing" in self.q(css=self.NAME_FIELD_WRAPPER_SELECTOR).first.attrs("class")[0]
 
 
 class XBlockWrapper(PageObject):

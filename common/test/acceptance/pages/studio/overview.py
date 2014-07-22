@@ -254,6 +254,7 @@ class CourseOutlinePage(CoursePage, CourseOutlineContainer):
     url_path = "course"
     CHILD_CLASS = CourseOutlineSection
     EXPAND_COLLAPSE_CSS = '.toggle-button-expand-collapse'
+    BOTTOM_ADD_SECTION_BUTTON = '.course-outline > .add-xblock-component .add-button'
 
     def is_browser_on_page(self):
         return self.q(css='body.view-outline').present
@@ -286,10 +287,17 @@ class CourseOutlinePage(CoursePage, CourseOutlineContainer):
         """
         Clicks the button for adding a section which resides at the bottom of the screen.
         """
-        click_css(self, '.course-outline > .add-xblock-component .add-button')
+        click_css(self, self.BOTTOM_ADD_SECTION_BUTTON)
 
     def toggle_expand_collapse(self):
         self.q(css=self.EXPAND_COLLAPSE_CSS).click()
+
+    @property
+    def bottom_add_section_button(self):
+        """
+        Returns the query representing the bottom add section button.
+        """
+        return self.q(css=self.BOTTOM_ADD_SECTION_BUTTON).first
 
     @property
     def has_no_content_message(self):
