@@ -2,6 +2,8 @@
 Acceptance tests for studio related to the outline page.
 """
 
+from bok_choy.promise import EmptyPromise
+
 from ..pages.studio.auto_auth import AutoAuthPage
 from ..pages.studio.overview import CourseOutlinePage, ContainerPage, ExpandCollapseLinkState
 from ..fixtures.course import CourseFixture, XBlockFixtureDesc
@@ -209,6 +211,7 @@ class CreateSectionsTest(CourseOutlineTest):
         self.assertEqual(len(self.course_outline_page.section_at(0).subsections()), 1)
         self.course_outline_page.section_at(0).subsection_at(0).add_unit()
         unit_page = ContainerPage(self.browser, None)
+        EmptyPromise(unit_page.is_browser_on_page, 'Browser is on the unit page').fulfill()
         self.assertTrue(unit_page.display_name_in_editable_form())
 
 
@@ -558,4 +561,5 @@ class DefaultStatesTest(CourseOutlineTest):
     #         Then a new tab will open to the course on the LMS
     #     """
     #     self.fail("I don't know how to test this")
+
 

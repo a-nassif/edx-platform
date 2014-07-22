@@ -55,7 +55,9 @@ class CourseOutlineItem(object):
         """
         Return whether this outline item's display name is in its editable form.
         """
-        return "is-editing" in self.q(css=self._bounded_selector(self.NAME_FIELD_WRAPPER_SELECTOR)).first.attrs("class")
+        return "is-editing" in self.q(
+            css=self._bounded_selector(self.NAME_FIELD_WRAPPER_SELECTOR)
+        )[0].get_attribute("class")
 
 
 class CourseOutlineContainer(CourseOutlineItem):
