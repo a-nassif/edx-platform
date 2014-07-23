@@ -4,12 +4,11 @@ Acceptance tests for studio related to the outline page.
 
 from bok_choy.promise import EmptyPromise
 
-from ..pages.studio.auto_auth import AutoAuthPage
 from ..pages.studio.overview import CourseOutlinePage, ContainerPage, ExpandCollapseLinkState
 from ..pages.lms.courseware import CoursewarePage
-from ..fixtures.course import CourseFixture, XBlockFixtureDesc
+from ..fixtures.course import XBlockFixtureDesc
 
-from helpers import StudioCourseTest
+from acceptance.tests.helpers import StudioCourseTest
 
 
 class CourseOutlineTest(StudioCourseTest):
@@ -48,6 +47,9 @@ class EditNamesTest(CourseOutlineTest):
     __test__ = True
 
     def set_name_and_verify(self, item, old_name, new_name, expected_name):
+        """
+        Changes the display name of item from old_name to new_name, then verifies that its value is expected_name.
+        """
         self.assertEqual(item.name, old_name)
         item.change_name(new_name)
         self.assertFalse(item.in_editable_form())
@@ -90,7 +92,6 @@ class EditNamesTest(CourseOutlineTest):
             'Changed',
             'Changed'
         )
-
 
     def test_edit_empty_section_name(self):
         """
@@ -265,7 +266,6 @@ class DeleteContentTest(CourseOutlineTest):
         self.assertEqual(len(self.course_outline_page.section_at(0).subsections()), 1)
         self.course_outline_page.section_at(0).subsection_at(0).delete()
         self.assertEqual(len(self.course_outline_page.section_at(0).subsections()), 0)
-
 
     def test_cancel_delete_subsection(self):
         """

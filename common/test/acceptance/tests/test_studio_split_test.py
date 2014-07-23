@@ -17,7 +17,7 @@ from ..pages.studio.settings_group_configurations import GroupConfigurationsPage
 from ..pages.studio.utils import add_advanced_component
 from ..pages.xblock.utils import wait_for_xblock_initialization
 
-from helpers import StudioCourseTest
+from acceptance.tests.helpers import StudioCourseTest
 
 from test_studio_container import ContainerBase
 
@@ -232,7 +232,7 @@ class GroupConfigurationsTest(ContainerBase):
 
     def populate_course_fixture(self, course_fixture):
         course_fixture.add_advanced_settings({
-            u"advanced_modules": { "value": [ "split_test" ]},
+            u"advanced_modules": {"value": ["split_test"]},
         })
         course_fixture.add_children(
             XBlockFixtureDesc('chpater', 'Test Section').add_children(

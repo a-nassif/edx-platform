@@ -17,7 +17,8 @@ from ..pages.studio.utils import add_discussion
 from ..pages.lms.courseware import CoursewarePage
 from ..pages.lms.staff_view import StaffPage
 
-from helpers import StudioCourseTest
+from acceptance.tests.helpers import StudioCourseTest
+
 
 class ContainerBase(StudioCourseTest):
     """

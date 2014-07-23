@@ -213,6 +213,9 @@ class CourseOutlineSubsection(CourseOutlineChild, CourseOutlineContainer):
         return self.child_at(index)
 
     def add_unit(self):
+        """
+        Adds a unit to this subsection
+        """
         self.add_child(require_notification=False)
 
 
@@ -231,6 +234,9 @@ class CourseOutlineSection(CourseOutlineChild, CourseOutlineContainer):
         return self.child(title)
 
     def subsections(self):
+        """
+        Returns a list of the CourseOutlineSubsections of this section
+        """
         return self.children()
 
     def subsection_at(self, index):
@@ -240,10 +246,16 @@ class CourseOutlineSection(CourseOutlineChild, CourseOutlineContainer):
         return self.child_at(index)
 
     def add_subsection(self):
+        """
+        Adds a subsection to this section
+        """
         self.add_child()
 
 
 class ExpandCollapseLinkState:
+    """
+    Represents the three states that the expand/collapse link can be in
+    """
     MISSING = 0
     COLLAPSE = 1
     EXPAND = 2
@@ -299,6 +311,9 @@ class CourseOutlinePage(CoursePage, CourseOutlineContainer):
         click_css(self, self.BOTTOM_ADD_SECTION_BUTTON)
 
     def toggle_expand_collapse(self):
+        """
+        Toggles whether all sections are expanded or collapsed
+        """
         self.q(css=self.EXPAND_COLLAPSE_CSS).click()
 
     @property
@@ -310,10 +325,16 @@ class CourseOutlinePage(CoursePage, CourseOutlineContainer):
 
     @property
     def has_no_content_message(self):
+        """
+        Returns true if a message informing the user that the course has no content is visible
+        """
         return self.q(css='.course-outline .no-content').is_present()
 
     @property
     def expand_collapse_link_state(self):
+        """
+        Returns the current state of the expand/collapse link
+        """
         link = self.q(css=self.EXPAND_COLLAPSE_CSS)[0]
         if not link.is_displayed():
             return ExpandCollapseLinkState.MISSING

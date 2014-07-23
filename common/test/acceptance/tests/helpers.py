@@ -142,7 +142,7 @@ class StudioCourseTest(UniqueCourseTest):
         """
         self.auth_page = AutoAuthPage(
             self.browser,
-            staff=False,
+            staff=is_staff,
             username=user.get('username'),
             email=user.get('email'),
             password=user.get('password')
