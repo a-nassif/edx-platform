@@ -515,7 +515,7 @@ class TestMixedModuleStore(unittest.TestCase):
         self._create_block_hierarchy()
 
         # publish the course
-        self.store.publish(self.course.location, self.user_id)
+        self.course = self.store.publish(self.course.location.version_agnostic(), self.user_id)
 
         # make drafts of verticals
         self.store.convert_to_draft(self.vertical_x1a, self.user_id)
@@ -541,7 +541,7 @@ class TestMixedModuleStore(unittest.TestCase):
         ])
 
         # publish the course again
-        self.store.publish(self.course.location, self.user_id)
+        self.store.publish(self.course.location.version_agnostic(), self.user_id)
         self.verify_get_parent_locations_results([
             (child_to_move_location, new_parent_location, None),
             (child_to_move_location, new_parent_location, ModuleStoreEnum.RevisionOption.draft_preferred),

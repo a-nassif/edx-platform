@@ -37,6 +37,7 @@ Representation:
                 ***** 'previous_version': the guid for the structure which previously changed this xblock
                 (will be the previous value of update_version; so, may point to a structure not in this
                 structure's history.)
+                ***** 'source_version': the guid for the structure was copied/published into this block
 * definition: shared content with revision history for xblock content fields
     ** '_id': definition_id (guid),
     ** 'category': xblock type id
@@ -1391,7 +1392,8 @@ class SplitMongoModuleStore(ModuleStoreWriteBase):
             # update/create the subtree and its children in destination (skipping blacklist)
             orphans.update(
                 self._publish_subdag(
-                    user_id, subtree_root.block_id, source_structure['blocks'], destination_blocks, blacklist
+                    user_id, destination_structure['_id'],
+                    subtree_root.block_id, source_structure['blocks'], destination_blocks, blacklist
                 )
             )
         # remove any remaining orphans
@@ -1797,7 +1799,7 @@ class SplitMongoModuleStore(ModuleStoreWriteBase):
         destination_parent['fields']['children'] = destination_reordered
         return orphans
 
-    def _publish_subdag(self, user_id, block_id, source_blocks, destination_blocks, blacklist):
+    def _publish_subdag(self, user_id, destination_version, block_id, source_blocks, destination_blocks, blacklist):
         """
         Update destination_blocks for the sub-dag rooted at block_id to be like the one in
         source_blocks excluding blacklist.
@@ -1809,31 +1811,45 @@ class SplitMongoModuleStore(ModuleStoreWriteBase):
         destination_block = destination_blocks.get(encoded_block_id)
         new_block = source_blocks[encoded_block_id]
         if destination_block:
-            if destination_block['edit_info']['update_version'] != new_block['edit_info']['update_version']:
-                source_children = new_block['fields'].get('children', [])
-                for child in destination_block['fields'].get('children', []):
-                    try:
-                        source_children.index(child)
-                    except ValueError:
-                        orphans.add(child)
-                previous_version = new_block['edit_info']['update_version']
-                destination_block = copy.deepcopy(new_block)
-                destination_block['fields'] = self._filter_blacklist(destination_block['fields'], blacklist)
-                destination_block['edit_info']['previous_version'] = previous_version
-                destination_block['edit_info']['edited_by'] = user_id
+            source_children = new_block['fields'].get('children', [])
+            for child in destination_block['fields'].get('children', []):
+                try:
+                    source_children.index(child)
+                except ValueError:
+                    orphans.add(child)
+            # the history of the published leaps between publications and only points to
+            # previously published versions.
+            previous_version = destination_block['edit_info']['update_version']
+            existing_children = destination_block['fields'].get('children', [])
+            if blacklist != EXCLUDE_ALL:
+                mod_blacklist = [child for child in blacklist if child not in existing_children]
+            destination_block = copy.deepcopy(new_block)
+            if blacklist == EXCLUDE_ALL:
+                destination_block['fields']['children'] = existing_children
+            else:
+                destination_block['fields'] = self._filter_blacklist(destination_block['fields'], mod_blacklist)
+            destination_block['edit_info']['previous_version'] = previous_version
+            destination_block['edit_info']['update_version'] = destination_version
+            destination_block['edit_info']['edited_by'] = user_id
         else:
             destination_block = self._new_block(
                 user_id, new_block['category'],
                 self._filter_blacklist(copy.copy(new_block['fields']), blacklist),
                 new_block['definition'],
-                new_block['edit_info']['update_version'],
+                destination_version,
                 raw=True
             )
 
+        # introduce new edit info field for tracing where copied/published blocks came
+        destination_block['edit_info']['source_version'] = new_block['edit_info']['update_version']
         if blacklist != EXCLUDE_ALL:
             for child in destination_block['fields'].get('children', []):
                 if child not in blacklist:
-                    orphans.update(self._publish_subdag(user_id, child, source_blocks, destination_blocks, blacklist))
+                    orphans.update(
+                        self._publish_subdag(
+                            user_id, destination_version, child, source_blocks, destination_blocks, blacklist
+                        )
+                    )
         destination_blocks[encoded_block_id] = destination_block
         return orphans
 

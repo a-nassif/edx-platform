@@ -29,10 +29,13 @@ class DraftVersioningModuleStore(ModuleStoreDraftAndPublished, SplitMongoModuleS
 
     def _auto_publish(self, location, category, user_id, black_list=None):
         """
-        Publishes item if the category is DIRECT_ONLY.
+        Publishes item if the category is DIRECT_ONLY. This assumes another method has checked that
+        location points to the head of the branch and ignores the version. If you call this in any
+        other context, you may blow away another user's changes.
         """
         if category in DIRECT_ONLY_CATEGORIES:
-            self.publish(location, user_id, black_list=black_list)
+            # version_agnostic b/c of above assumption in docstring
+            self.publish(location.version_agnostic(), user_id, black_list=black_list)
 
     def update_item(self, descriptor, user_id, allow_not_found=False, force=False):
         item = super(DraftVersioningModuleStore, self).update_item(
@@ -64,7 +67,7 @@ class DraftVersioningModuleStore(ModuleStoreDraftAndPublished, SplitMongoModuleS
     ):
         item = super(DraftVersioningModuleStore, self).create_child(
             user_id, parent_usage_key, block_type, block_id=block_id,
-            fields=fields, continue_version=False, **kwargs
+            fields=fields, continue_version=continue_version, **kwargs
         )
         self._auto_publish(parent_usage_key, item.location.category, user_id, black_list=EXCLUDE_ALL)
         return item
@@ -169,13 +172,13 @@ class DraftVersioningModuleStore(ModuleStoreDraftAndPublished, SplitMongoModuleS
 
     def publish(self, location, user_id, **kwargs):
         """
-        Save a current draft to the underlying modulestore.
+        Publishes the subtree under location from the draft branch to the published branch
         Returns the newly published item.
         """
         SplitMongoModuleStore.copy(
             self,
             user_id,
-            location.course_key.for_branch(ModuleStoreEnum.BranchName.draft),
+            location.course_key.replace(branch=ModuleStoreEnum.BranchName.draft),
             location.course_key.for_branch(ModuleStoreEnum.BranchName.published),
             [location],
             blacklist=kwargs.pop('black_list', None)
