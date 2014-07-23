@@ -240,7 +240,7 @@ class ContainerPage(PageObject):
         """
         return self.q(css=".xblock-message.information").first.text[0]
 
-    def display_name_in_editable_form(self):
+    def is_inline_editing_display_name(self):
         """
         Return whether this container's display name is in its editable form.
         """

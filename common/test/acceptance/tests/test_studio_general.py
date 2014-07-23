@@ -24,7 +24,7 @@ from ..pages.studio.signup import SignupPage
 from ..pages.studio.textbooks import TextbooksPage
 from ..fixtures.course import CourseFixture, XBlockFixtureDesc
 
-from acceptance.tests.helpers import StudioCourseTest
+from acceptance.tests.studio_helpers import StudioCourseTest
 
 
 class LoggedOutTest(WebAppTest):

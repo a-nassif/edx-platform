@@ -91,11 +91,8 @@ class CourseOutlineContainer(CourseOutlineItem):
         """
         if not child_class:
             child_class = self.CHILD_CLASS
-
-        children = []
-        for child_element in self.q(css=child_class.BODY_SELECTOR):
-            children.append(child_class(self.browser, child_element.get_attribute('data-locator')))
-        return children
+        return self.q(css=child_class.BODY_SELECTOR).map(
+            lambda el: child_class(self.browser, el.get_attribute('data-locator'))).results
 
     def child_at(self, index, child_class=None):
         """

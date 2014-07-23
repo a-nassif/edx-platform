@@ -8,13 +8,12 @@ from ..pages.studio.overview import CourseOutlinePage, ContainerPage, ExpandColl
 from ..pages.lms.courseware import CoursewarePage
 from ..fixtures.course import XBlockFixtureDesc
 
-from acceptance.tests.helpers import StudioCourseTest
+from acceptance.tests.studio_helpers import StudioCourseTest
 
 
 class CourseOutlineTest(StudioCourseTest):
     """
-    Tests that verify the sections name editable only inside headers in Sutdio Course Outline that you can get to
-    when logged in and have a course.
+    Base class for all course outline tests
     """
 
     COURSE_ID_SEPARATOR = "."
@@ -96,7 +95,7 @@ class EditNamesTest(CourseOutlineTest):
     def test_edit_empty_section_name(self):
         """
         Scenario: Click-to-edit section name, enter empty name
-            Given that I have crate a section
+            Given that I have created a section
             And I have clicked to edit the name of the section
             And I have entered an empty section name
             When I click outside of the edited section name
@@ -128,19 +127,6 @@ class EditNamesTest(CourseOutlineTest):
             '',
             'Test Subsection'
         )
-
-    # TODO: reenable when release date support is added back
-    # def test_section_name_not_editable_inside_modal(self):
-    #     """
-    #     Check that the section name is not editable inside "Section Release Date" modal on course outline page.
-    #     """
-    #     parent_css = 'div.modal-window'
-    #     self.course_outline_page.click_release_date()
-    #     section_name = self.course_outline_page.get_section_name(parent_css)[0]
-    #     self.assertEqual(section_name, '"Test Section"')
-    #     self.course_outline_page.click_section_name(parent_css)
-    #     section_name_edit_form = self.course_outline_page.section_name_edit_form_present(parent_css)
-    #     self.assertFalse(section_name_edit_form)
 
 
 class CreateSectionsTest(CourseOutlineTest):
@@ -213,7 +199,7 @@ class CreateSectionsTest(CourseOutlineTest):
         self.course_outline_page.section_at(0).subsection_at(0).add_unit()
         unit_page = ContainerPage(self.browser, None)
         EmptyPromise(unit_page.is_browser_on_page, 'Browser is on the unit page').fulfill()
-        self.assertTrue(unit_page.display_name_in_editable_form())
+        self.assertTrue(unit_page.is_inline_editing_display_name())
 
 
 class DeleteContentTest(CourseOutlineTest):
@@ -257,7 +243,7 @@ class DeleteContentTest(CourseOutlineTest):
         Scenario: Delete subsection
             Given that I am on the course outline
             When I click the delete button for a subsection on the course outline
-            Then I should receive a confirmation message, asking me if I really want to delte the subsection
+            Then I should receive a confirmation message, asking me if I really want to delete the subsection
             When I click "Yes, I want to delete this component"
             Then the confiramtion message should close
             And the subsection should immediately be deleted from the course outline
@@ -301,9 +287,9 @@ class DeleteContentTest(CourseOutlineTest):
         """
         Scenario: Cancel delete of unit
             Given that I clicked the delete button for a unit on the course outline
-            And I received a confiramtion message, asking me if I really want to delete the unit
+            And I received a confirmation message, asking me if I really want to delete the unit
             When I click "Cancel"
-            Then the confiramtion message should close
+            Then the confirmation message should close
             And the unit should remain in the course outline
         """
         self.course_outline_page.visit()
@@ -329,9 +315,7 @@ class DeleteContentTest(CourseOutlineTest):
 
 class ExpandCollapseMultipleSectionsTest(CourseOutlineTest):
     """
-    Feature: In order to quickly view the details of a course's section and set release dates and grading as a course
-    author I want to use the course outline page.
-    These tests start with multiple existing course sections.
+    Feature: Courses with multiple sections can expand and collapse all sections.
     """
 
     __test__ = True
@@ -462,9 +446,7 @@ class ExpandCollapseMultipleSectionsTest(CourseOutlineTest):
 
 class ExpandCollapseSingleSectionTest(CourseOutlineTest):
     """
-    Feature: In order to quickly view the details of a course's section and set release dates and grading as a course
-    author I want ot use the course outline page.
-    These tests start with a single section.
+    Feature: Courses with a single section can expand and collapse all sections.
     """
 
     __test__ = True
@@ -487,9 +469,7 @@ class ExpandCollapseSingleSectionTest(CourseOutlineTest):
 
 class ExpandCollapseEmptyTest(CourseOutlineTest):
     """
-    Feature: In order to quickly view the details of a course's section and set release dates and grading as a course
-    author I want to use the course outline page.
-    These tests start with no course sections.
+    Feature: Courses with no sections initially can expand and collapse all sections after addition.
     """
 
     __test__ = True
@@ -558,6 +538,7 @@ class DefaultStatesTest(CourseOutlineTest):
         self.course_outline_page.view_live()
         courseware = CoursewarePage(self.browser, self.course_id)
         EmptyPromise(courseware.is_browser_on_page, 'Browser is on courseware page').fulfill()
+        self.assertEqual(courseware.num_xblock_components, 0)
 
 
 class UnitNavigationTest(CourseOutlineTest):

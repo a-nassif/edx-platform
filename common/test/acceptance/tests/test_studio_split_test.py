@@ -17,7 +17,7 @@ from ..pages.studio.settings_group_configurations import GroupConfigurationsPage
 from ..pages.studio.utils import add_advanced_component
 from ..pages.xblock.utils import wait_for_xblock_initialization
 
-from acceptance.tests.helpers import StudioCourseTest
+from acceptance.tests.studio_helpers import StudioCourseTest
 
 from test_studio_container import ContainerBase
 
