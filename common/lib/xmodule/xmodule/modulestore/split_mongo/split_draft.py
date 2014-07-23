@@ -42,10 +42,7 @@ class DraftVersioningModuleStore(ModuleStoreDraftAndPublished, SplitMongoModuleS
             force=force
         )
         # On update_item we don't want to auto publish the children
-        black_list = None
-        if hasattr(item, 'children'):
-            black_list = item.children
-        self._auto_publish(item.location, item.location.category, user_id, black_list=black_list)
+        self._auto_publish(item.location, item.location.category, user_id, black_list=EXCLUDE_ALL)
         return item
 
     def create_item(
