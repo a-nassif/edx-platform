@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=E1101
+# pylint: disable=protected-access
 """
 Tests for import_from_xml using the mongo modulestore.
 """
@@ -10,8 +11,10 @@ from django.conf import settings
 import copy
 
 from xmodule.modulestore.tests.django_utils import ModuleStoreTestCase
+from xmodule.modulestore import ModuleStoreEnum
 from xmodule.modulestore.django import modulestore
 from xmodule.contentstore.django import contentstore
+from xmodule.modulestore.tests.factories import check_number_of_calls
 from opaque_keys.edx.locations import SlashSeparatedCourseKey, AssetLocation
 from xmodule.modulestore.xml_importer import import_from_xml
 from xmodule.exceptions import NotFoundError
@@ -148,6 +151,19 @@ class ContentStoreImportTest(ModuleStoreTestCase):
         _module_store, _content_store, course = self.load_test_import_course()
         print "course tabs = {0}".format(course.tabs)
         self.assertEqual(course.tabs[2]['name'], 'Syllabus')
+
+    def test_import_performance_mongo(self):
+        # during import into the DraftMongoModuleStore, the meta data inheritance tree should be computed exactly twice:
+        #   once, when course is published (ideally, the inheritance computation during publish should also be skipped)
+        #   again, when the bulk edit operations are completed
+        store = modulestore()._get_modulestore_by_type(ModuleStoreEnum.Type.mongo)
+        with check_number_of_calls(
+            store,
+            store._compute_metadata_inheritance_tree,
+            '_compute_metadata_inheritance_tree',
+            2,
+        ):
+            self.load_test_import_course()
 
     def test_rewrite_reference_list(self):
         module_store = modulestore()

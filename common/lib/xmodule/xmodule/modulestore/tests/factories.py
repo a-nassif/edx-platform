@@ -9,7 +9,7 @@ from xblock.core import XBlock
 from xmodule.tabs import StaticTab
 from decorator import contextmanager
 from mock import Mock, patch
-from nose.tools import assert_less_equal
+from nose.tools import assert_less_equal, assert_greater_equal
 
 
 class Dummy(object):
@@ -220,6 +220,27 @@ class ItemFactory(XModuleFactory):
 
 
 @contextmanager
+def check_number_of_calls(object_with_method, method, method_name, maximum_calls, minimum_calls=1):
+    """
+    Instruments the given method on the given object to verify the number of calls to the method is
+    less than or equal to the expected maximum_calls and greater than or equal to the expected minimum_calls.
+    """
+    method_wrap = Mock(wraps=method)
+    wrap_patch = patch.object(object_with_method, method_name, method_wrap)
+    try:
+        wrap_patch.start()
+        yield
+    finally:
+        wrap_patch.stop()
+
+        # verify the counter actually worked by ensuring we have counted greater than (or equal to) the minimum calls
+        assert_greater_equal(method_wrap.call_count, minimum_calls)
+
+        # now verify the number of actual calls is less than (or equal to) the expected maximum
+        assert_less_equal(method_wrap.call_count, maximum_calls)
+
+
+@contextmanager
 def check_mongo_calls(mongo_store, max_finds=0, max_sends=None):
     """
     Instruments the given store to count the number of calls to find (incl find_one) and the number
@@ -232,18 +253,14 @@ def check_mongo_calls(mongo_store, max_finds=0, max_sends=None):
     :param max_sends: If none, don't instrument the send calls. If non-none, count and compare to
         the given int value.
     """
-    try:
-        find_wrap = Mock(wraps=mongo_store.collection.find)
-        wrap_patch = patch.object(mongo_store.collection, 'find', find_wrap)
-        wrap_patch.start()
+    with check_number_of_calls(mongo_store.collection, mongo_store.collection.find, 'find', max_finds):
         if max_sends:
-            sends_wrap = Mock(wraps=mongo_store.database.connection._send_message)
-            sends_patch = patch.object(mongo_store.database.connection, '_send_message', sends_wrap)
-            sends_patch.start()
-        yield
-    finally:
-        wrap_patch.stop()
-        if max_sends:
-            sends_patch.stop()
-            assert_less_equal(sends_wrap.call_count, max_sends)
-        assert_less_equal(find_wrap.call_count, max_finds)
+            with check_number_of_calls(
+                mongo_store.database.connection,
+                mongo_store.database.connection._send_message,  # pylint: disable=protected-access
+                '_send_message',
+                max_sends,
+            ):
+                yield
+        else:
+            yield
