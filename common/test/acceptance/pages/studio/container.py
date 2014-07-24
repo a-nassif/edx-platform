@@ -8,7 +8,7 @@ from . import BASE_URL
 
 from selenium.webdriver.common.action_chains import ActionChains
 
-from utils import click_css, wait_for_notification
+from utils import click_css, wait_for_notification, confirm_prompt
 
 
 class ContainerPage(PageObject):
@@ -132,7 +132,7 @@ class ContainerPage(PageObject):
         Discards draft changes (which will then re-render the page).
         """
         click_css(self, 'a.action-discard', 0, require_notification=False)
-        self.q(css='a.button.action-primary').first.click()
+        confirm_prompt(self)
         self.wait_for_ajax()
 
     def toggle_staff_lock(self):
@@ -147,7 +147,7 @@ class ContainerPage(PageObject):
             self.q(css='a.action-staff-lock').first.click()
         else:
             click_css(self, 'a.action-staff-lock', 0, require_notification=False)
-            self.q(css='a.button.action-primary').first.click()
+            confirm_prompt(self)
         self.wait_for_ajax()
         return not was_locked_initially
 
@@ -214,7 +214,7 @@ class ContainerPage(PageObject):
         """
         click_css(self, 'a.delete-button', source_index, require_notification=False)
         # Click the confirmation dialog button
-        click_css(self, 'a.button.action-primary', 0)
+        confirm_prompt(self)
 
     def edit(self):
         """

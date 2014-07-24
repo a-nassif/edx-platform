@@ -6,7 +6,7 @@ from bok_choy.promise import EmptyPromise
 
 from .course_page import CoursePage
 from .container import ContainerPage
-from .utils import set_input_value_and_save, click_css
+from .utils import set_input_value_and_save, click_css, confirm_prompt
 
 
 class CourseOutlineItem(object):
@@ -20,7 +20,7 @@ class CourseOutlineItem(object):
     NAME_FIELD_WRAPPER_SELECTOR = '.xblock-title .wrapper-xblock-field'
 
     def __repr__(self):
-        return "{}(<browser>, {!r})".format(self.__class__.__name__, self.locator)
+        return "{}(<browser>, {!r})".format(self.__class__.__name__, self.locator if hasattr(self, 'locator') else None)
 
     def _bounded_selector(self, selector):
         """
@@ -160,10 +160,7 @@ class CourseOutlineChild(PageObject, CourseOutlineItem):
         Clicks the delete button, then cancels at the confirmation prompt if cancel is True.
         """
         click_css(self, self._bounded_selector('.delete-button'), require_notification=False)
-        if cancel:
-            click_css(self, '.prompt .action-secondary', require_notification=False)
-        else:
-            click_css(self, '.prompt .action-primary', require_notification=True)
+        confirm_prompt(self, cancel)
 
 
 class CourseOutlineUnit(CourseOutlineChild):
