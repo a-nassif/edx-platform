@@ -178,6 +178,7 @@ class DraftVersioningModuleStore(ModuleStoreDraftAndPublished, SplitMongoModuleS
         SplitMongoModuleStore.copy(
             self,
             user_id,
+            # replace in order to still check if location is from head of its branch
             location.course_key.replace(branch=ModuleStoreEnum.BranchName.draft),
             location.course_key.for_branch(ModuleStoreEnum.BranchName.published),
             [location],

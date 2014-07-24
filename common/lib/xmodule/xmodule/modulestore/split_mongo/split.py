@@ -1811,23 +1811,26 @@ class SplitMongoModuleStore(ModuleStoreWriteBase):
         destination_block = destination_blocks.get(encoded_block_id)
         new_block = source_blocks[encoded_block_id]
         if destination_block:
+            # reorder children to correspond to whatever order holds for source and remove
+            # any which source no longer claims
             source_children = new_block['fields'].get('children', [])
-            for child in destination_block['fields'].get('children', []):
+            existing_children = destination_block['fields'].get('children', [])
+            destination_reordered = SparseList()
+            for child in existing_children:
                 try:
-                    source_children.index(child)
+                    index = source_children.index(child)
+                    destination_reordered[index] = child
                 except ValueError:
                     orphans.add(child)
+            if blacklist != EXCLUDE_ALL:
+                for index, child in enumerate(source_children):
+                    if child not in blacklist:
+                        destination_reordered[index] = child
             # the history of the published leaps between publications and only points to
             # previously published versions.
             previous_version = destination_block['edit_info']['update_version']
-            existing_children = destination_block['fields'].get('children', [])
-            if blacklist != EXCLUDE_ALL:
-                mod_blacklist = [child for child in blacklist if child not in existing_children]
             destination_block = copy.deepcopy(new_block)
-            if blacklist == EXCLUDE_ALL:
-                destination_block['fields']['children'] = existing_children
-            else:
-                destination_block['fields'] = self._filter_blacklist(destination_block['fields'], mod_blacklist)
+            destination_block['fields']['children'] = destination_reordered.compact_list()
             destination_block['edit_info']['previous_version'] = previous_version
             destination_block['edit_info']['update_version'] = destination_version
             destination_block['edit_info']['edited_by'] = user_id
@@ -1842,6 +1845,7 @@ class SplitMongoModuleStore(ModuleStoreWriteBase):
 
         # introduce new edit info field for tracing where copied/published blocks came
         destination_block['edit_info']['source_version'] = new_block['edit_info']['update_version']
+
         if blacklist != EXCLUDE_ALL:
             for child in destination_block['fields'].get('children', []):
                 if child not in blacklist:
@@ -1938,3 +1942,25 @@ class SplitMongoModuleStore(ModuleStoreWriteBase):
         Check that the db is reachable.
         """
         return {ModuleStoreEnum.Type.split: self.db_connection.heartbeat()}
+
+
+class SparseList(list):
+    """
+    Enable inserting items into a list in arbitrary order and then retrieving them.
+    """
+    # taken from http://stackoverflow.com/questions/1857780/sparse-assignment-list-in-python
+    def __setitem__(self, index, value):
+        """
+        Add value to the list ensuring the list is long enough to accommodate it at the given index
+        """
+        missing = index - len(self) + 1
+        if missing > 0:
+            self.extend([None] * missing)
+        list.__setitem__(self, index, value)
+
+    def compact_list(self):
+        """
+        Return as a regular lists w/ all Nones removed
+        """
+        return [ele for ele in self if ele is not None]
+
