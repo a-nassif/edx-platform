@@ -7,11 +7,11 @@ var publishClass = '';
 if (publishState === 'staff_only') {
     publishClass = 'is-staff-only';
 } else if (publishState === 'live') {
-    publishClass = 'is-live is-published is-released';
+    publishClass = 'is-live';
 } else if (publishState === 'ready') {
-    publishClass = 'is-ready is-published';
+    publishClass = 'is-ready';
 } else if (publishState === 'has_unpublished_content') {
-    publishClass = 'is-published has-unpublished-content';
+    publishClass = 'has-warnings';
 }
 
 var listType = 'list-unknown';

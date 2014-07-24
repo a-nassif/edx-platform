@@ -1153,7 +1153,6 @@ class TestXBlockInfo(ItemTest):
         self.assertEqual(xblock_info['category'], 'course')
         self.assertEqual(xblock_info['id'], 'i4x://MITx/999/course/Robot_Super_Course')
         self.assertEqual(xblock_info['display_name'], 'Robot Super Course')
-        self.assertTrue(xblock_info['published'])
 
         # Finally, validate the entire response for consistency
         self.validate_xblock_info_consistency(xblock_info, has_child_info=has_child_info)
@@ -1165,7 +1164,6 @@ class TestXBlockInfo(ItemTest):
         self.assertEqual(xblock_info['category'], 'chapter')
         self.assertEqual(xblock_info['id'], 'i4x://MITx/999/chapter/Week_1')
         self.assertEqual(xblock_info['display_name'], 'Week 1')
-        self.assertTrue(xblock_info['published'])
         self.assertEqual(xblock_info['edited_by'], 'testuser')
 
         # Finally, validate the entire response for consistency
@@ -1178,7 +1176,6 @@ class TestXBlockInfo(ItemTest):
         self.assertEqual(xblock_info['category'], 'sequential')
         self.assertEqual(xblock_info['id'], 'i4x://MITx/999/sequential/Lesson_1')
         self.assertEqual(xblock_info['display_name'], 'Lesson 1')
-        self.assertTrue(xblock_info['published'])
         self.assertEqual(xblock_info['edited_by'], 'testuser')
 
         # Finally, validate the entire response for consistency
@@ -1191,7 +1188,6 @@ class TestXBlockInfo(ItemTest):
         self.assertEqual(xblock_info['category'], 'vertical')
         self.assertEqual(xblock_info['id'], 'i4x://MITx/999/vertical/Unit_1')
         self.assertEqual(xblock_info['display_name'], 'Unit 1')
-        self.assertTrue(xblock_info['published'])
         self.assertEqual(xblock_info['edited_by'], 'testuser')
 
         # Validate that the correct ancestor info has been included
@@ -1213,7 +1209,6 @@ class TestXBlockInfo(ItemTest):
         self.assertEqual(xblock_info['category'], 'video')
         self.assertEqual(xblock_info['id'], 'i4x://MITx/999/video/My_Video')
         self.assertEqual(xblock_info['display_name'], 'My Video')
-        self.assertTrue(xblock_info['published'])
         self.assertEqual(xblock_info['edited_by'], 'testuser')
 
         # Finally, validate the entire response for consistency
@@ -1226,7 +1221,6 @@ class TestXBlockInfo(ItemTest):
         self.assertIsNotNone(xblock_info['display_name'])
         self.assertIsNotNone(xblock_info['id'])
         self.assertIsNotNone(xblock_info['category'])
-        self.assertIsNotNone(xblock_info['published'])
         self.assertEqual(xblock_info['edited_by'], 'testuser')
         if has_ancestor_info:
             self.assertIsNotNone(xblock_info.get('ancestor_info', None))
@@ -1340,20 +1334,28 @@ class TestXBlockPublishingInfo(ItemTest):
 
     def test_partially_released_section_publishing_info(self):
         chapter = self._create_child(self.course, 'chapter', "Test Chapter")
-        sequential = self._create_child(chapter, 'sequential', "Released Sequential")
-        self._create_child(sequential, 'vertical', "Published Unit", publish_item=True)
+        released_sequential = self._create_child(chapter, 'sequential', "Released Sequential")
+        self._create_child(released_sequential, 'vertical', "Released Unit", publish_item=True)
         self._set_release_date(chapter.location, datetime.now(UTC) - timedelta(days=1))
-        sequential2 = self._create_child(chapter, 'sequential', "Published Sequential")
-        self._create_child(sequential2, 'vertical', "Published Unit", publish_item=True)
-        self._set_release_date(sequential2.location, datetime.now(UTC) + timedelta(days=1))
+        published_sequential = self._create_child(chapter, 'sequential', "Published Sequential")
+        self._create_child(published_sequential, 'vertical', "Published Unit", publish_item=True)
+        self._set_release_date(published_sequential.location, datetime.now(UTC) + timedelta(days=1))
         xblock_info = self._get_xblock_info(chapter.location)
+
+        # Verify the state of the released sequential
+        released_sequential_child_info = self._get_child(xblock_info, 0)
+        released_unit_child_info = self._get_child(released_sequential_child_info, 0)
+        self.assertEqual(released_unit_child_info['publish_state'], PublishState.live)
+        self.assertEqual(released_sequential_child_info['publish_state'], PublishState.live)
+
+        # Verify the state of the published sequential
+        public_sequential_child_info = self._get_child(xblock_info, 1)
+        public_unit_child_info = self._get_child(public_sequential_child_info, 0)
+        self.assertEqual(public_sequential_child_info['publish_state'], PublishState.ready)
+        self.assertEqual(public_unit_child_info['publish_state'], PublishState.ready)
+
+        # Finally verify the state of the chapter
         self.assertEqual(xblock_info['publish_state'], PublishState.ready)
-        sequential_child_info = self._get_child(xblock_info, 0)
-        self.assertEqual(sequential_child_info['publish_state'], PublishState.live)
-        sequential_child_info_2 = self._get_child(xblock_info, 0)
-        self.assertEqual(sequential_child_info_2['publish_state'], PublishState.ready)
-        unit_child_info = self._get_child(sequential_child_info, 0)
-        self.assertEqual(unit_child_info['publish_state'], PublishState.live)
 
     def test_unpublished_changes_publishing_info(self):
         chapter = self._create_child(self.course, 'chapter', "Test Chapter")

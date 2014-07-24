@@ -7,7 +7,7 @@ if (publishState === 'staff_only') {
 } else if (publishState === 'ready') {
     publishClass = 'is-ready is-published';
 } else if (publishState === 'has_unpublished_content') {
-    publishClass = 'is-published has-unpublished-content';
+    publishClass = 'has-warnings';
 }
 
 var title = gettext("Draft (Never published)");
@@ -15,7 +15,7 @@ if (publishState === 'staff_only') {
     title = gettext("Unpublished (Staff only)");
 } else if (publishState === 'live' || publishState === 'ready') {
     title = gettext("Published");
-} else if (publishState === 'has_unpublished_changes') {
+} else if (publishState === 'has_unpublished_content') {
     title = gettext("Draft (Unpublished changes)");
 }
 
